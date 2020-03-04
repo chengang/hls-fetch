@@ -69,7 +69,12 @@ if (!exists $opt{'output'}) {
 }
 
 my ($url) = @ARGV;
-my $browser = LWP::UserAgent->new;
+my $browser = LWP::UserAgent->new(
+  agent => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
+  ssl_opts => {
+    verify_hostname => 0
+  },
+);
 $browser->cookie_jar({});
 
 my $video_file = $opt{'output'};
@@ -217,6 +222,9 @@ foreach my $sequence (sort { $a <=> $b } keys %segments) {
       close $decrypt_fh;
       my $iv = sprintf('%032x', $sequence);
       my @cmd = ('openssl', 'aes-128-cbc', '-d', '-in', $segment_file, '-out', $decrypt_file, '-K', $cryptkeys{$segment->{'cryptkey_url'}}, '-iv', $iv);
+      print("\n");
+      print( join " ", @cmd );
+      print("\n");
       system @cmd;
       unlink $segment_file || warn "$segment_file: cannot remove file: $!\n";
       $segment_file = $decrypt_file;
